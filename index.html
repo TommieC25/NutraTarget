@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NutriTarget">
-<title>NutriTarget</title>
+<meta name="apple-mobile-web-app-title" content="NutraTarget">
+<title>NutraTarget</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -667,7 +667,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="logo">Nutri<span>Target</span></div>
+    <div class="logo">Nutra<span>Target</span></div>
     <div class="date-badge" id="dateDisplay"></div>
   </header>
 
@@ -892,7 +892,7 @@ function init() {
 
 function loadState() {
   try {
-    const saved = localStorage.getItem('nutritarget_state');
+    const saved = localStorage.getItem('nutratarget_state');
     if (saved) {
       const parsed = JSON.parse(saved);
       state.targets = parsed.targets || state.targets;
@@ -903,7 +903,7 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem('nutritarget_state', JSON.stringify(state));
+  localStorage.setItem('nutratarget_state', JSON.stringify(state));
 }
 
 function updateDate() {
