@@ -275,10 +275,8 @@
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
-    cursor: pointer;
     transition: border-color 0.2s;
   }
-  .camera-area:active { border-color: var(--accent); }
   .camera-area img {
     width: 100%;
     height: 100%;
@@ -287,9 +285,15 @@
     top: 0; left: 0;
     border-radius: 14px;
   }
-  .camera-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
-  .camera-hint { font-size: 14px; color: var(--text-dim); text-align: center; line-height: 1.5; }
+  .camera-icon { font-size: 48px; margin-bottom: 8px; opacity: 0.4; }
+  .camera-hint { font-size: 14px; color: var(--text-dim); text-align: center; line-height: 1.5; margin-bottom: 20px; }
+  .camera-btns { display: flex; gap: 10px; width: 100%; max-width: 260px; }
+  .camera-btns .btn { margin: 0; flex: 1; font-size: 13px; padding: 12px 8px; }
   #fileInput { display: none; }
+  /* ── PHOTO ACTIONS ── */
+  #photoActions { display: none; }
+  #photoActions .btn { margin-top: 0; }
+  #photoActions .btn + .btn { margin-top: 8px; }
   /* ── ANALYSIS RESULT ── */
   .result-card {
     background: var(--surface);
@@ -605,12 +609,22 @@
     <div id="apiWarning" class="api-warning" style="display:none">
       ⚠️ Add your Anthropic API key in <strong>Targets</strong> to enable photo analysis.
     </div>
-    <div class="camera-area" id="cameraArea" onclick="document.getElementById('fileInput').click()">
-      <div class="camera-icon">📷</div>
-      <div class="camera-hint">Tap to take a photo<br>or choose from library</div>
+    <div class="camera-area" id="cameraArea">
+      <div id="cameraPrompt" style="display:flex;flex-direction:column;align-items:center;padding:24px 16px;">
+        <div class="camera-icon">📷</div>
+        <div class="camera-hint">What did you eat?</div>
+        <div class="camera-btns">
+          <button class="btn btn-secondary" onclick="openCamera()">📷 Camera</button>
+          <button class="btn btn-secondary" onclick="openLibrary()">🖼️ Library</button>
+        </div>
+      </div>
       <img id="previewImg" style="display:none" alt="food preview">
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <input type="file" id="fileInput" accept="image/*">
+    <div id="photoActions">
+      <button class="btn btn-primary" onclick="submitPhoto()">Analyze This Photo</button>
+      <button class="btn btn-secondary" onclick="retakePhoto()">Retake / Choose Different</button>
+    </div>
     <div class="result-card" id="resultCard">
       <div class="confidence-badge" id="confidenceBadge">✦ AI Analysis</div>
       <div class="result-food-name" id="resultName"></div>
@@ -634,7 +648,7 @@
         </div>
       </div>
       <button class="btn btn-primary" onclick="logCurrentMeal()">Add to Today's Log</button>
-      <button class="btn btn-secondary" onclick="clearAnalysis()" style="margin-top:8px">Retake Photo</button>
+      <button class="btn btn-secondary" onclick="clearAnalysis()" style="margin-top:8px">New Photo</button>
     </div>
     <div id="noResultYet">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;font-size:13px;color:var(--text-dim);line-height:1.7;">
@@ -741,7 +755,8 @@ let state = {
   targets: { calories: 2000, protein: 150, carbs: 200, fat: 65, fiber: 30 },
   todayLog: [],
   apiKey: '',
-  pendingAnalysis: null
+  pendingAnalysis: null,
+  pendingFile: null
 };
 
 // ── INIT ──
@@ -932,24 +947,64 @@ async function renderHistory() {
 }
 
 // ── CAMERA / FILE ──
+function openCamera() {
+  const inp = document.getElementById('fileInput');
+  inp.setAttribute('capture', 'environment');
+  inp.click();
+}
+
+function openLibrary() {
+  const inp = document.getElementById('fileInput');
+  inp.removeAttribute('capture');
+  inp.click();
+}
+
 function handleFileSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(ev) {
+    state.pendingFile = { file, dataUrl: ev.target.result };
     const previewImg = document.getElementById('previewImg');
     previewImg.src = ev.target.result;
     previewImg.style.display = 'block';
-    document.querySelector('.camera-icon').style.display = 'none';
-    document.querySelector('.camera-hint').style.display = 'none';
-    analyzeFood(file, ev.target.result);
+    document.getElementById('cameraPrompt').style.display = 'none';
+    document.getElementById('photoActions').style.display = 'block';
+    document.getElementById('noResultYet').style.display = 'none';
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('manualForm').classList.remove('visible');
   };
   reader.readAsDataURL(file);
   e.target.value = '';
 }
 
+function submitPhoto() {
+  if (!state.pendingFile) return;
+  document.getElementById('photoActions').style.display = 'none';
+  analyzeFood(state.pendingFile.file, state.pendingFile.dataUrl);
+}
+
+function retakePhoto() {
+  state.pendingFile = null;
+  const previewImg = document.getElementById('previewImg');
+  previewImg.style.display = 'none';
+  previewImg.src = '';
+  document.getElementById('cameraPrompt').style.display = 'flex';
+  document.getElementById('photoActions').style.display = 'none';
+  document.getElementById('noResultYet').style.display = 'block';
+  document.getElementById('resultCard').classList.remove('visible');
+}
+
 async function analyzeFood(file, dataUrl) {
+<<<<<<< HEAD
+  if (!state.apiKey) {
+    showToast('Add your API key in Targets first', true);
+    document.getElementById('photoActions').style.display = 'block';
+    return;
+  }
+=======
   if (!state.apiKey) { showToast('Add your API key in Targets first', true); return; }
+>>>>>>> origin/main
   document.getElementById('resultCard').classList.remove('visible');
   document.getElementById('noResultYet').style.display = 'none';
   document.getElementById('manualForm').classList.remove('visible');
@@ -1012,7 +1067,7 @@ Be realistic about portions based on visual cues. If you cannot identify the foo
   } catch(err) {
     hideLoading();
     showToast('Error: ' + err.message, true);
-    document.getElementById('noResultYet').style.display = 'block';
+    document.getElementById('photoActions').style.display = 'block';
   }
 }
 
@@ -1059,11 +1114,12 @@ async function logCurrentMeal() {
 
 function clearAnalysis() {
   state.pendingAnalysis = null;
+  state.pendingFile = null;
   const previewImg = document.getElementById('previewImg');
   previewImg.style.display = 'none';
   previewImg.src = '';
-  document.querySelector('.camera-icon').style.display = 'block';
-  document.querySelector('.camera-hint').style.display = 'block';
+  document.getElementById('cameraPrompt').style.display = 'flex';
+  document.getElementById('photoActions').style.display = 'none';
   document.getElementById('resultCard').classList.remove('visible');
   document.getElementById('noResultYet').style.display = 'block';
 }
