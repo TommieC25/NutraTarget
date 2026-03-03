@@ -996,11 +996,15 @@ function retakePhoto() {
 }
 
 async function analyzeFood(file, dataUrl) {
+<<<<<<< HEAD
   if (!state.apiKey) {
     showToast('Add your API key in Targets first', true);
     document.getElementById('photoActions').style.display = 'block';
     return;
   }
+=======
+  if (!state.apiKey) { showToast('Add your API key in Targets first', true); return; }
+>>>>>>> origin/main
   document.getElementById('resultCard').classList.remove('visible');
   document.getElementById('noResultYet').style.display = 'none';
   document.getElementById('manualForm').classList.remove('visible');
